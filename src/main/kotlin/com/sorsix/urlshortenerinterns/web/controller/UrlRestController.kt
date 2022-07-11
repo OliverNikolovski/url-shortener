@@ -19,7 +19,7 @@ class UrlRestController(val urlService: UrlService) {
     fun getShortUrl(urlRequest: UrlRequest): ResponseEntity<UrlResponse> {
         return when (val urlResult = urlService.saveUrl(urlRequest.url)) {
             is UrlSaved -> ResponseEntity.ok(UrlSuccess(urlResult.url.originalUrl, urlResult.url.shortUrlId))
-            is UrlNotValid -> ResponseEntity.badRequest().body(UrlError(urlResult.error))
+            is UrlNotValidOrDoesNotExist -> ResponseEntity.badRequest().body(UrlError(urlResult.error))
             is UrlSavingError -> ResponseEntity.internalServerError().body(UrlError(urlResult.error))
         }
     }

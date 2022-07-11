@@ -23,4 +23,6 @@ interface UrlService {
 
     fun deleteUrlsOlderThan(numberOfDays: Long)
 
+    fun urlExists(url: String): Boolean
+
 }

@@ -7,8 +7,11 @@ import com.sorsix.urlshortenerinterns.service.UrlService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.net.HttpURLConnection
+import java.net.URL
 import java.time.LocalDateTime
 
 @Service
@@ -34,7 +37,12 @@ class UrlServiceImpl(
     override fun saveUrl(originalUrl: String): UrlResult {
         if (!originalUrl.matches(this.validUrlRegex)) {
             this.logger.debug("Url not valid: {}", originalUrl)
-            return UrlNotValid("Invalid URL")
+            return UrlNotValidOrDoesNotExist("Invalid URL")
+        }
+
+        if (!this.urlExists(originalUrl)) {
+            this.logger.debug("Url does not exist: {}", originalUrl);
+            return UrlNotValidOrDoesNotExist("Invalid Hostname")
         }
 
         val urlFromDb = this.urlRepository.findByOriginalUrl(originalUrl)
@@ -71,6 +79,18 @@ class UrlServiceImpl(
     override fun deleteUrlsOlderThan(numberOfDays: Long) {
         val date = LocalDateTime.now().minusDays(numberOfDays)
         this.urlRepository.deleteUrlsByTimestampBefore(date)
+    }
+
+    override fun urlExists(url: String): Boolean {
+        return try {
+            val urlObject = URL(url)
+            val connection = urlObject.openConnection() as HttpURLConnection
+            connection.requestMethod = "HEAD"
+            HttpStatus.valueOf(connection.responseCode).is2xxSuccessful
+        }
+        catch (ex: Exception) {
+            false
+        }
     }
 
 }

@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS url (
+    id BIGSERIAL PRIMARY KEY,
+    original_url VARCHAR(2000) UNIQUE,
+    short_url_id VARCHAR(4) UNIQUE,
+    timestamp TIMESTAMP WITHOUT TIME ZONE
+)
